@@ -108,7 +108,7 @@ async def greeting_gm():
         # if eventType == 3 or eventType == 4:
 
         # 60秒ごとにループする
-        interval = 60
+        interval = 30
         time.sleep(interval)
 
     # while true :
