@@ -47,6 +47,20 @@ async def greeting_gm():
     msg = GetEventInfoMsg(eventInfo)
     await client.send_message(text_chat, msg)
     """
+    # 起動後にはイベント情報を取得する
+    # イベント情報取得
+    event_info = GetEventInfo()
+    if event_info == "":
+        msg = "現在開催中のイベントはありません"
+    else:
+        event_type = event_info['type']
+        event_id = event_info['id']
+        # イベント情報メッセージ生成
+        msg = GetEventInfoMsg(event_info)
+
+    await client.send_message(text_chat, msg)
+
+
 
     cnt = 0
     lastDate = ""
@@ -56,6 +70,8 @@ async def greeting_gm():
 
         # 次の取得時刻の計算
         await client.send_message(text_chat, nowTime)
+
+
 
         # テストとして1分ごとにループする
         interval = 10
