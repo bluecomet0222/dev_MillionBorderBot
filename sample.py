@@ -51,7 +51,7 @@ async def greeting_gm():
     cnt = 0
     lastDate = ""
     while cnt == 0:
-        nowTime = datetime.datetime.now()
+        nowTime = datetime.datetime.now().timedelta(hours=9)
         event_type = -1
 
         # 次の取得時刻の計算
