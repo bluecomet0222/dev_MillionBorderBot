@@ -18,6 +18,8 @@ TEXT_CHANNEL = "545291639141171210" # テキストチャットのチャンネル
 RequestURL = "https://api.matsurihi.me/mltd/v1/"
 RequestEventsURL = RequestURL + "events/"
 GetRankNumber = "1,2,3,100,101,2500,5000"
+EventType = -1
+
 """
 APIVersion = "version/latest"
 EventType = "/rankings/logs/eventPoint/"
@@ -25,6 +27,7 @@ GetRunkinNum
 """
 
 client = discord.Client() # 接続に使用するオブジェクト
+loop = asyncio.get_event_loop() # イベントループを取得
 text_chat = discord.Object(id=TEXT_CHANNEL)
 
 
@@ -34,7 +37,7 @@ text_chat = discord.Object(id=TEXT_CHANNEL)
 @client.event
 async def on_ready():
     print('ログインしました')
-    asyncio.ensure_future(greeting_gm())
+    asyncio.ensure_future(greeting_gm(), loop=loop)
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
@@ -42,12 +45,9 @@ async def on_ready():
 
 @client.event
 async def greeting_gm():
+
     await client.send_message(text_chat, '起動しました。')
-    """
-    eventInfo = GetEventInfo()
-    msg = GetEventInfoMsg(eventInfo)
-    await client.send_message(text_chat, msg)
-    """
+
     # 起動後にはイベント情報を取得する
     # イベント情報取得
     eventInfo = GetEventInfo()
@@ -59,17 +59,30 @@ async def greeting_gm():
         eventId = eventInfo['id']
         # イベント情報メッセージ生成
         msg = GetEventInfoMsg(eventInfo)
-
     await client.send_message(text_chat, msg)
 
-    cnt = 0
     lastDate = ""
-    while cnt == 0:
+
+    while True:
+        """
+        # 起動後にはイベント情報を取得する
+        # イベント情報取得
+        eventInfo = GetEventInfo()
+
+        if eventInfo == "":
+            msg = "現在開催中のイベントはありません"
+        else:
+            eventType = eventInfo['type']
+            eventId = eventInfo['id']
+            # イベント情報メッセージ生成
+            msg = GetEventInfoMsg(eventInfo)
+        await client.send_message(text_chat, msg)
+        """
+
         nowTime = datetime.datetime.now()
-        eventType = -1
 
         # ToDo : 00:00ならイベント情報を再取得する
-        if nowTime.hour == "0" and nowTime.minute == "0" :
+        if nowTime.hour == "0" and nowTime.minute == "0":
             eventInfo = GetEventInfo()
             if eventInfo == "":
                 msg = "現在開催中のイベントはありません"
@@ -79,17 +92,16 @@ async def greeting_gm():
                 # イベント情報メッセージ生成
                 msg = GetEventInfoMsg(eventInfo)
 
-
         # 次の取得時刻の計算
         await client.send_message(text_chat, nowTime)
 
         # 1.Typeを確認し、シアターもしくはツアーでならば実行
         # ミリコレ、ワーキングなら実行しない
-        #if eventType == 3 or eventType == 4:
+        # if eventType == 3 or eventType == 4:
         if eventType == 3 or eventType == 4:
 
             # 2.前回の更新から40分以上経過 or 初取得であれば実行
-            if lastDate == "" :
+            if lastDate == "":
 
                 # 取得処理開始
                 # ポイントランキング取得
@@ -108,10 +120,10 @@ async def greeting_gm():
         # if eventType == 3 or eventType == 4:
 
         # 60秒ごとにループする
-        interval = 30
-        time.sleep(interval)
+        interval = 10
+        await asyncio.sleep(10)
+    #time.sleep(interval)
 
-    # while true :
 
 ###############################
 # 各種関数
@@ -128,7 +140,6 @@ def GetEventInfo():
    #       なので、イベント情報をすべて引っ張ってきて最後のidの情報の終了日が今の日付より前ならイベントありと判断する
    orderBy = "beginTime" + datetime.datetime.now().strftime("%Y-%m-%d")
    requestUrl = RequestEventsURL + "?" + orderBy
-   print(requestUrl)
    reqeustAction = urllib.request.Request(requestUrl)
 
    with urllib.request.urlopen(reqeustAction) as responceData:
