@@ -58,9 +58,9 @@ async def greeting_gm():
         await client.send_message(text_chat, nowTime)
 
         # テストとして1分ごとにループする
-        interval = 60
+        interval = 10
         time.sleep(interval)
- 
+
     # while true :
 
 ###############################
