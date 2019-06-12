@@ -55,45 +55,12 @@ async def greeting_gm():
         event_type = -1
 
         # 次の取得時刻の計算
-        print(nowTime)
-        if nowTime.second < 10:
-            interval = 10 - nowTime.second
-        elif 10 <= nowTime.second and nowTime.second < 40:
-            interval = 40 - nowTime.second
-        else:
-            interval = 60 - nowTime.second + 10
-        interval = interval * 60
+        await client.send_message(text_chat, nowTime)
 
-        # 初回 or 日付が変更されたら取得する
-        if lastDate == "" or nowTime.strftime("%Y-%m-%d") != lastDate:
-            # イベント情報取得
-            event_info = GetEventInfo()
-            if event_info == "":
-                msg = "現在開催中のイベントはありません"
-                # 0時 or 15時に取得する
-                print(nowTime.hour)
-                if nowTime.hour < 15 :
-                    interval = 15 - nowTime.hour
-                elif nowTime.hour == 15    :
-                    interval = 24
-                elif 15 < nowTime.hour :
-                    interval = 24 - nowTime.hour
-                interval = interval * 360
-
-            else:
-                event_type = event_info['type']
-                event_id = event_info['id']
-                # イベント情報メッセージ生成
-                msg = GetEventInfoMsg(event_info)
-
-            await client.send_message(text_chat, msg)
-        #  if lastDate == "" or now.strftime("%Y-%m-%d") != lastDate:
-
-        #interval = interval * 60 # 秒単位なので分に置き換え
-        lastDate = nowTime.strftime("%Y-%m-%d")
-        print(interval)
+        # テストとして1分ごとにループする
+        interval = 60
         time.sleep(interval)
-
+ 
     # while true :
 
 ###############################
