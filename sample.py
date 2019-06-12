@@ -15,11 +15,10 @@ TEXT_CHANNEL = "545291639141171210" # テキストチャットのチャンネル
 
 #
 # https://api.matsurihi.me/docs/
-RequestURL = "https://api.matsurihi.me/mltd/v1/"
-RequestEventsURL = RequestURL + "events/"
-GetRankNumber = "1,2,3,100,101,2500,5000"
-EventType = -1
-
+RequestURL = "https://api.matsurihi.me/mltd/v1/"    # APIのパス
+RequestEventsURL = RequestURL + "events/"           # API_イベント用のフォルダ
+GetRankNumber = "1,2,3,100,101,2500,5000"           # 取得ランキング
+Interval = 60                                       # 60秒ごとにループする
 """
 APIVersion = "version/latest"
 EventType = "/rankings/logs/eventPoint/"
@@ -54,6 +53,7 @@ async def greeting_gm():
 
     if eventInfo == "":
         msg = "現在開催中のイベントはありません"
+        eventType = -1
     else:
         eventType = eventInfo['type']
         eventId = eventInfo['id']
@@ -64,24 +64,9 @@ async def greeting_gm():
     lastDate = ""
 
     while True:
-        """
-        # 起動後にはイベント情報を取得する
-        # イベント情報取得
-        eventInfo = GetEventInfo()
-
-        if eventInfo == "":
-            msg = "現在開催中のイベントはありません"
-        else:
-            eventType = eventInfo['type']
-            eventId = eventInfo['id']
-            # イベント情報メッセージ生成
-            msg = GetEventInfoMsg(eventInfo)
-        await client.send_message(text_chat, msg)
-        """
 
         nowTime = datetime.datetime.now()
 
-        # ToDo : 00:00ならイベント情報を再取得する
         if nowTime.hour == "0" and nowTime.minute == "0":
             eventInfo = GetEventInfo()
             if eventInfo == "":
@@ -101,27 +86,24 @@ async def greeting_gm():
         if eventType == 3 or eventType == 4:
 
             # 2.前回の更新から40分以上経過 or 初取得であれば実行
-            if lastDate == "":
-
+            # ランキング更新判定
+            if ChkUpdateRanking(lastDate, nowTime):
                 # 取得処理開始
                 # ポイントランキング取得
                 rankingInfo = GetEventPointRanking(eventId)
-                # ランキング更新判定
-                if ChkUpdateRanking(rankingInfo, lastDate):
-                    msg = GetEventPointRankingMsg(rankingInfo)
-                    await client.send_message(text_chat, msg)
+                msg = GetEventPointRankingMsg(rankingInfo)
+                await client.send_message(text_chat, msg)
 
-                    # 取得時刻の追記
-                    dataCnt = len(rankingInfo[0]['data']) - 1
-                    lastDate = TimeConversion(rankingInfo[0]['data'][dataCnt]['summaryTime'])
-                    print(lastDate)
+                # 取得時刻の追記
+                dataCnt = len(rankingInfo[0]['data']) - 1
+                lastDate = TimeConversion(rankingInfo[0]['data'][dataCnt]['summaryTime'])
+                print(lastDate)
                 # if ChkUpdateRanking(rankingInfo, lastDate):
             # if lastDate == "" :
         # if eventType == 3 or eventType == 4:
 
-        # 60秒ごとにループする
-        interval = 60
-        await asyncio.sleep(interval)
+
+        await asyncio.sleep(Interval)
     #time.sleep(interval)
 
 
@@ -138,8 +120,15 @@ def GetEventInfo():
    # ex) https://api.matsurihi.me/mltd/v1/events?type=theater&at=2019-02-09
    # 注意：時刻指定の場合、イベント開始日にはAPIが対応していない模様
    #       なので、イベント情報をすべて引っ張ってきて最後のidの情報の終了日が今の日付より前ならイベントありと判断する
-   orderBy = "beginTime" + datetime.datetime.now().strftime("%Y-%m-%d")
-   requestUrl = RequestEventsURL + "?" + orderBy
+   requestParams = "beginTime" + datetime.datetime.now().strftime("%Y-%m-%d")
+   requestUrl = RequestEventsURL + "?" + requestParams
+   """
+   # =========テスト用=========
+   requestParams = "at=2019-06-05"
+   requestUrl = RequestEventsURL + "?" + requestParams
+   print(requestUrl)
+   # =========テスト用=========
+   """
    reqeustAction = urllib.request.Request(requestUrl)
 
    with urllib.request.urlopen(reqeustAction) as responceData:
@@ -161,8 +150,15 @@ def GetEventInfo():
             nowTime = datetime.datetime.now()
 
             # 現在の時刻を取得し比較する
-            if endDate.date() <= nowTime.date() and endTime.strftime("%H:%M:%S") < nowTime.strftime("%H:%M:%S") :
+            if endDate.date() < nowTime.date() :
                 eventInfoJson = ""
+            elif endDate.date() == nowTime.date() and endTime.strftime("%H:%M:%S") < nowTime.strftime("%H:%M:%S") :
+                eventInfoJson = ""
+            """
+           # =========テスト用=========
+           eventInfoJson = jsonDict[0]
+           # =========テスト用=========
+           """
 
    return eventInfoJson
 
@@ -251,18 +247,32 @@ def TimeConversion(date_time):
 # 引数：ランキング情報, 最終日時
 # 戻り値：boolean true 更新されている false 更新されていない
 #########################
-def ChkUpdateRanking(getRanking, lastTime):
+def ChkUpdateRanking(lastDataTime, nowTime):
+    print(lastDataTime)
+    print(nowTime)
 
-    dataCnt= len(getRanking[0]['data']) - 1
-    tmpArray = TimeConversion(getRanking[0]['data'][dataCnt]['summaryTime'])
-    updateChkFlg = False
+    updateFlg = False
+    if lastDataTime == "" :
+        updateFlg = True
 
-    if lastTime == "" :
-        updateChkFlg = True
-    elif tmpArray[0] != lastTime[0] or  tmpArray[1] != lastTime[1] :
-        updateChkFlg = True
+    else :
 
-    return updateChkFlg
+        summaryDate = datetime.datetime.strptime(lastDataTime[0], '%Y-%m-%d')
+        summaryTime = datetime.datetime.strptime(lastDataTime[1], '%H:%M:%S')
+
+        nextTime = datetime.datetime(summaryDate.year, summaryDate.month, summaryDate.day, summaryTime.hour, summaryTime.minute, summaryTime.second)
+        nextTime = nextTime + datetime.timedelta(minutes=40)
+
+        # 現在時刻とデータ更新時刻＋40分の時刻を比較し
+        # 超えていれば再取得を行う
+        if nextTime.date() < nowTime.date():
+            updateFlg = True
+        elif nextTime.date() == nowTime.date() and nextTime.strftime("%H:%M:%S") < nowTime.strftime("%H:%M:%S"):
+            updateFlg = True
+
+    print(updateFlg)
+
+    return updateFlg
 
 #########################
 # ランキング情報整形関数
@@ -297,6 +307,33 @@ def GetEventPointRankingMsg(getRanking):
     return msg
 
 #get_event_point_ranking_msg():
+
+
+def TestFnc() :
+    eventId = 89
+    rankingInfo = GetEventPointRanking(eventId)
+
+    # 取得時刻の追記
+    dataCnt = len(rankingInfo[0]['data']) - 1
+    lastDate = TimeConversion(rankingInfo[0]['data'][dataCnt]['summaryTime'])
+    summaryDate = datetime.datetime.strptime(lastDate[0], '%Y-%m-%d')
+    summaryTime = datetime.datetime.strptime(lastDate[1], '%H:%M:%S')
+
+    nextTime = datetime.datetime(summaryDate.year, summaryDate.month, summaryDate.day, summaryTime.hour, summaryTime.minute, summaryTime.second) + datetime.timedelta(minutes=40)
+    nowTime = datetime.datetime.now()
+
+    updateFlg = False
+
+    # 現在時刻とデータ更新時刻＋40分の時刻を比較し
+    # 超えていれば再取得を行う
+    if nextTime.date() < nowTime.date():
+        updateFlg = True
+    elif nextTime.date() == nowTime.date() and nextTime.strftime("%H:%M:%S") < nowTime.strftime("%H:%M:%S"):
+        updateFlg = True
+
+    return updateFlg
+
+#def TestFnc() :
 
 ###############################
 # ボット起動
