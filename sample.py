@@ -120,8 +120,8 @@ async def greeting_gm():
         # if eventType == 3 or eventType == 4:
 
         # 60秒ごとにループする
-        interval = 10
-        await asyncio.sleep(10)
+        interval = 60
+        await asyncio.sleep(interval)
     #time.sleep(interval)
 
 
