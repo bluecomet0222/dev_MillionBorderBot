@@ -172,11 +172,13 @@ def GetEventInfo():
    #       なので、イベント情報をすべて引っ張ってきて最後のidの情報の終了日が今の日付より前ならイベントありと判断する
    requestParams = "beginTime" + datetime.datetime.now().strftime("%Y-%m-%d")
    requestUrl = RequestEventsURL + "?" + requestParams
+   """
    # =========テスト用=========
    requestParams = "at=2019-06-05"
    requestUrl = RequestEventsURL + "?" + requestParams
    print(requestUrl)
    # =========テスト用=========
+   """
    reqeustAction = urllib.request.Request(requestUrl)
 
    try:
