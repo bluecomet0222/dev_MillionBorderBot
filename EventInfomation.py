@@ -1,7 +1,6 @@
 import datetime
 import Common
 
-
 class EventInfomation:
     #
     # https://api.matsurihi.me/docs/
@@ -10,6 +9,8 @@ class EventInfomation:
     GetPersonRankNumber = "1,2,3,4,5,6,7,8,9,10,11,98,99,100,101,2500,2501,5000"  # 個人取得ランキング
     GetLoungeRankNumber = "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15"  # ラウンジ取得ランキング
     Interval = 60  # 60秒ごとにループする
+    SpaceCount = 10
+    DiffSpaceCount = 7
     common = Common.Common()
 
     ###################
@@ -17,7 +18,6 @@ class EventInfomation:
     ###################
     def __init__(self):
         pass
-
 
     ###################
     # イベント情報取得関数
@@ -191,7 +191,21 @@ class EventInfomation:
                 now_score = int(now_data['score'])
                 old_score = int(old_data['score'])
                 diff_score = now_score - old_score
-                msg += str(get_rank) + "位:  " + str(now_score) + "pt ( +" + str(diff_score) + "pt )" + "\n"
+
+
+                # 余白の逆算をする
+                spaceCount = self.SpaceCount - len(str(get_rank)) - len(str(now_score))
+                diffSpaceCount = self.DiffSpaceCount - len(str(diff_score))
+                space = ""
+                diffSpace = ""
+
+                for i in range(spaceCount) :
+                    space += " "
+
+                for i in range(diffSpaceCount) :
+                    diffSpace += " "
+
+                msg += str(get_rank) + "位: " + space + str(now_score) + "pt (+" + diffSpace + str(diff_score) + "pt)" + "\n"
 
             # else :
 
@@ -224,8 +238,6 @@ class EventInfomation:
 
         return getSummayTime
     #  def getSummaryTime(self, rankingInfo):
-
-
 
 
     ###################

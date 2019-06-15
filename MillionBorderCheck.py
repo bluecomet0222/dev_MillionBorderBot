@@ -9,8 +9,8 @@ import EventInfomation
 ###############################
 
 # サーバ定数
-BOT_TOKEN            = "NTA3MjE1ODM4NTA4NjEzNjQz.Drtdbw.4m56UuTFpeU7MIpwJzfrvusttnE"
-TEXT_CHANNEL         = "545291639141171210"  # テキストチャットのチャンネルID
+BotToken            = "NTA3MjE1ODM4NTA4NjEzNjQz.Drtdbw.4m56UuTFpeU7MIpwJzfrvusttnE"
+Text_Channel         = "545291639141171210"  # テキストチャットのチャンネルID
 EventInfoChanel      = "588734619692695558"  # イベント情報チャットのチャンネルID
 PersonRankingChanel  = "588734676383039509"  # 個人ポイントチャットのチャンネルID
 LoungeRankingChanel  = "588742168970002439"  # ラウンジポイントチャットのチャンネルID
@@ -26,7 +26,7 @@ NoEventMsg = "現在開催中のイベントはありません"
 client = discord.Client() # 接続に使用するオブジェクト
 
 # 各チャットのオブジェクト
-text_chat = discord.Object(id=TEXT_CHANNEL)
+text_chat = discord.Object(id=Text_Channel)
 eventChat = discord.Object(id=EventInfoChanel)
 personRankChat = discord.Object(id=PersonRankingChanel)
 loungeRankChat = discord.Object(id=LoungeRankingChanel)
@@ -39,6 +39,7 @@ borderBotErrorChat = discord.Object(id=BorderBotErrorChanel)
 @client.event
 async def on_ready():
     print('ログインしました')
+    # 通常イベント
     eventInfo = EventInfomation.EventInfomation()
     asyncio.ensure_future(greeting_gm(eventInfo))
     print('Logged in as')
@@ -84,8 +85,7 @@ async def greeting_gm(_eventInfo):
 
         # 0時0分 または 15時(初日)ならば、イベント情報を出力する
         # 0時0分 ならば実行
-        #if nowTime.hour == 0 and nowTime.minute == 0:
-        if True:
+        if nowTime.hour == 0 and nowTime.minute == 0:
             eventInfo = _eventInfo.GetEventInfo()
             msg = NoEventMsg
             eventType = -1
@@ -102,7 +102,7 @@ async def greeting_gm(_eventInfo):
         elif nowTime.hour == 15 and nowTime.minute == 5:
             # ここを実行する時間がイベント初日であれば出力する
             eventInfo = _eventInfo.GetEventInfo()
-            tmpArray = getBeginTime(eventInfo)
+            tmpArray = _eventInfo.getBeginTime(eventInfo)
             beginData = datetime.datetime.strptime(tmpArray[0], '%Y-%m-%d')
 
             if beginData.date() == nowTime.date() :
@@ -164,5 +164,5 @@ async def greeting_gm(_eventInfo):
 ###############################
 
 # botの接続と起動
-# （BOT_TOKENにはbotアカウントのアクセストークンを入れてください）
-client.run(BOT_TOKEN)
+# （BotTokenにはbotアカウントのアクセストークンを入れてください）
+client.run(BotToken)
