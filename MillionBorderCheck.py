@@ -74,11 +74,12 @@ async def greeting_gm():
 
         nowTime = datetime.datetime.now()
         # ToDo : デバッグ用
-        nowTime = datetime.datetime(2019, 6, 13, 0, 0, 0)
+        #nowTime = datetime.datetime(2019, 6, 13, 0, 0, 0)
 
         # 0時0分 または 15時(初日)ならば、イベント情報を出力する
         # 0時0分 ならば実行
-        if nowTime.hour == 0 and nowTime.minute == 0:
+        #if nowTime.hour == 0 and nowTime.minute == 0:
+        if True:
             eventInfo = GetEventInfo()
             msg = NoEventMsg
             eventType = -1
@@ -217,26 +218,29 @@ def GetEventInfoMsg(eventInfoJson, nowTime):
     # 取得後、出力する
     # イベントの開始時刻と終了時刻を取得する
     tmpArray = TimeConversion(eventInfoJson['schedule']['beginDate'])
-    beginData = tmpArray[0]
-    beginTime = tmpArray[1]
+    beginDay = datetime.datetime.strptime(tmpArray[0], '%Y-%m-%d')
+    beginTime = datetime.datetime.strptime(tmpArray[1], '%H:%M:%S')
 
     tmpArray = TimeConversion(eventInfoJson['schedule']['endDate'])
-    endData = tmpArray[0]
-    endTime = tmpArray[1]
+    endDay = datetime.datetime.strptime(tmpArray[0], '%Y-%m-%d')
+    endTime = datetime.datetime.strptime(tmpArray[1], '%H:%M:%S')
 
+    beginData = datetime.datetime(beginDay.year, beginDay.month, beginDay.day, beginTime.hour, beginTime.minute, beginTime.second)
+    endData = datetime.datetime(endDay.year, endDay.month, endDay.day, endTime.hour, endTime.minute, endTime.second)
 
     # 取得日時
-    getEventInfo = ""
-    getEventInfo += "取得日時        :" + nowTime.strftime('%Y-%m-%d %H:%M:%S') + "\n"
-
     # 経過時間の逆算
-
-
+    # 秒単位で計算する
+    totalEventTime = (endData - beginData).total_seconds()
+    elapsedTime = (nowTime - beginData).total_seconds()
+    ruuningRercantage = ( elapsedTime / totalEventTime ) * 100
+    getEventInfo = ""
+    getEventInfo += "取得日時       :  " + nowTime.strftime('%Y-%m-%d %H:%M:%S') + " (" + str(round(ruuningRercantage, 2)) + "%)" + "\n"
 
     # イベント情報
     eventInfo = ""
     eventInfo += "イベント名     ： " + eventInfoJson['name'] + "\n"
-    eventInfo += "イベント期間   ： " + beginData + " " + beginTime + " ~ " + endData + " " + endTime + "\n"
+    eventInfo += "イベント期間   ： " + beginData.strftime('%Y-%m-%d %H:%M:%S') +  "  ~  " + endData.strftime('%Y-%m-%d %H:%M:%S') + "\n"
 
     boostInfo = ""
 
