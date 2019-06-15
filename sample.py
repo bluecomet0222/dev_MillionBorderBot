@@ -5,7 +5,6 @@ import json
 import datetime
 import time
 
-
 ###############################
 # パラメータ一覧
 ###############################
@@ -78,8 +77,8 @@ async def greeting_gm():
 
         # 0時0分 または 15時(初日)ならば、イベント情報を出力する
         # 0時0分 ならば実行
-#        if nowTime.hour == 0 and nowTime.minute == 0:
-        if nowTime.minute == 0:
+        if nowTime.hour == 0 and nowTime.minute == 0:
+#        if nowTime.minute == 0:
             eventInfo = GetEventInfo()
             msg = NoEventMsg
             eventType = -1
