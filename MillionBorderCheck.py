@@ -24,7 +24,7 @@ RequestURL = "https://api.matsurihi.me/mltd/v1/"    # APIのパス
 RequestEventsURL = RequestURL + "events/"           # API_イベント用のフォルダ
 GetPersonRankNumber = "1,2,3,4,5,6,7,8,9,10,11,98,99,100,101,2500,2501,5000"    # 個人取得ランキング
 GetLoungeRankNumber = "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15"                     # ラウンジ取得ランキング
-Interval = 30                                       # 60秒ごとにループする
+Interval = 60                                       # 60秒ごとにループする
 
 
 # メッセージ一覧
