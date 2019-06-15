@@ -1,1 +1,1 @@
-bot: python sample.py
+bot: python MillionBorderCheck.py
