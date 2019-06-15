@@ -24,7 +24,8 @@ RequestURL = "https://api.matsurihi.me/mltd/v1/"    # APIのパス
 RequestEventsURL = RequestURL + "events/"           # API_イベント用のフォルダ
 GetPersonRankNumber = "1,2,3,4,5,6,7,8,9,10,11,98,99,100,101,2500,2501,5000"    # 個人取得ランキング
 GetLoungeRankNumber = "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15"                     # ラウンジ取得ランキング
-Interval = 60                                       # 60秒ごとにループする
+Interval = 30                                       # 60秒ごとにループする
+
 
 # メッセージ一覧
 StartUpMsg = "起動しました。"
@@ -57,7 +58,6 @@ async def greeting_gm():
 
     # 起動後にはイベント情報を取得する
     eventInfo = GetEventInfo()
-    print(eventInfo)
     msg = NoEventMsg
     eventType = -1
     eventId = -1
@@ -74,12 +74,11 @@ async def greeting_gm():
 
         nowTime = datetime.datetime.now()
         # ToDo : デバッグ用
-        #nowTime = datetime.datetime(2019, 6, 13, 15, 5, 0)
+        nowTime = datetime.datetime(2019, 6, 13, 0, 0, 0)
 
         # 0時0分 または 15時(初日)ならば、イベント情報を出力する
         # 0時0分 ならば実行
         if nowTime.hour == 0 and nowTime.minute == 0:
-#        if nowTime.minute == 0:
             eventInfo = GetEventInfo()
             msg = NoEventMsg
             eventType = -1
@@ -89,21 +88,19 @@ async def greeting_gm():
                 eventType = eventInfo['type']
                 eventId = eventInfo['id']
                 # イベント情報メッセージ生成
-                msg = GetEventInfoMsg(eventInfo)
+                msg = GetEventInfoMsg(eventInfo, nowTime)
                 await client.send_message(eventChat, msg)
 
         # 15時5分ならば実行
         elif nowTime.hour == 15 and nowTime.minute == 5:
-
             # ここを実行する時間がイベント初日であれば出力する
             eventInfo = GetEventInfo()
             tmpArray = TimeConversion(eventInfo['schedule']['beginDate'])
             beginData = datetime.datetime.strptime(tmpArray[0], '%Y-%m-%d')
 
             if beginData.date() == nowTime.date() :
-                msg = GetEventInfoMsg(eventInfo)
+                msg = GetEventInfoMsg(eventInfo, nowTime)
                 await client.send_message(eventChat, msg)
-
 
         await client.send_message(eventChat, nowTime)
 
@@ -127,7 +124,7 @@ async def greeting_gm():
 
                     # 取得時刻の追記
                     lastPersonBorderDate = TimeConversion(rankingInfo[0]['data'][dataCnt]['summaryTime'])
-                    print(lastPersonBorderDate)
+
                 # if TimeConversion(rankingInfo[0]['data'][dataCnt]['summaryTime']) != lastPersonBorderDate:
              # if ChkUpdateRanking(rankingInfo, lastDate):
 
@@ -174,50 +171,37 @@ def GetEventInfo():
    requestUrl = RequestEventsURL + "?" + requestParams
    """
    # =========テスト用=========
+   # ToDo
    requestParams = "at=2019-06-05"
    requestUrl = RequestEventsURL + "?" + requestParams
    print(requestUrl)
    # =========テスト用=========
    """
-   reqeustAction = urllib.request.Request(requestUrl)
 
-   try:
-        with urllib.request.urlopen(reqeustAction) as responceData:
-            body = responceData.read()
+   jsonDict = sendRequest(requestUrl)
 
-            # 配列で取得される。1つ目の要素を取得
-            jsonDict = json.loads(body)
-            eventInfoJson = ""
-            if len(jsonDict) != 0:
-                lastEventNumber = len(jsonDict) - 1
-                print(len(jsonDict))
-                eventInfoJson = jsonDict[lastEventNumber]
-                tmpArray = TimeConversion(eventInfoJson['schedule']['endDate'])
+   if len(jsonDict) != 0:
+       lastEventNumber = len(jsonDict) - 1
+       eventInfoJson = jsonDict[lastEventNumber]
+       tmpArray = TimeConversion(eventInfoJson['schedule']['endDate'])
 
-                # フォーマット変換
-                endDate = datetime.datetime.strptime(tmpArray[0], '%Y-%m-%d')
-                endTime = datetime.datetime.strptime(tmpArray[1], '%H:%M:%S')
-                nowTime = datetime.datetime.now()
+       # フォーマット変換
+       endDate = datetime.datetime.strptime(tmpArray[0], '%Y-%m-%d')
+       endTime = datetime.datetime.strptime(tmpArray[1], '%H:%M:%S')
+       nowTime = datetime.datetime.now()
 
-                # 現在の時刻を取得し比較する
-                if endDate.date() < nowTime.date() :
-                    eventInfoJson = ""
-                elif endDate.date() == nowTime.date() and endTime.strftime("%H:%M:%S") < nowTime.strftime("%H:%M:%S") :
-                    eventInfoJson = ""
-
-                """
-                # =========テスト用=========
-                eventInfoJson = jsonDict[0]
-                # =========テスト用=========
-                """
-
-   except urllib.error.HTTPError as e:
-       print('raise HTTPError')
-       print(e.code)
-       print(e.reason)
-   except urllib.error.ConnectionError as e:
-       print('rase ConnectionError')
-       print(e.reason)
+       # 現在の時刻を取得し比較する
+       if endDate.date() < nowTime.date():
+           eventInfoJson = ""
+       elif endDate.date() == nowTime.date() and endTime.strftime("%H:%M:%S") < nowTime.strftime("%H:%M:%S"):
+           eventInfoJson = ""
+       """ 
+       # =========テスト用=========
+       # ToDo
+       eventInfoJson = jsonDict[0]
+       # =========テスト用=========
+       """
+    # if len(jsonDict) != 0:
 
    return eventInfoJson
 
@@ -228,7 +212,7 @@ def GetEventInfo():
 # 引数 : なし
 # 戻り値 : イベント情報
 ###################
-def GetEventInfoMsg(eventInfoJson):
+def GetEventInfoMsg(eventInfoJson, nowTime):
 
     # 取得後、出力する
     # イベントの開始時刻と終了時刻を取得する
@@ -240,9 +224,19 @@ def GetEventInfoMsg(eventInfoJson):
     endData = tmpArray[0]
     endTime = tmpArray[1]
 
+
+    # 取得日時
+    getEventInfo = ""
+    getEventInfo += "取得日時        :" + nowTime.strftime('%Y-%m-%d %H:%M:%S') + "\n"
+
+    # 経過時間の逆算
+
+
+
+    # イベント情報
     eventInfo = ""
-    eventInfo += "イベント名   ： " + eventInfoJson['name'] + "\n"
-    eventInfo += "イベント期間 ： " + beginData + " " + beginTime + " ~ " + endData + " " + endTime + "\n"
+    eventInfo += "イベント名     ： " + eventInfoJson['name'] + "\n"
+    eventInfo += "イベント期間   ： " + beginData + " " + beginTime + " ~ " + endData + " " + endTime + "\n"
 
     boostInfo = ""
 
@@ -257,10 +251,9 @@ def GetEventInfoMsg(eventInfoJson):
     # メッセージ追加
     msg = ""
     msg += "```" + "\n"
-    msg += "=======================================================================" + "\n"
+    msg += getEventInfo
     msg += eventInfo
     msg += boostInfo
-    msg += "=======================================================================" + "\n"
     msg += "```" + "\n"
 
     return msg
@@ -284,6 +277,18 @@ def GetEventPointPersonRanking(getId, type, ranking):
 
     # ex) https://api.matsurihi.me/mltd/v1/events/33/rankings/logs/eventPoint/1,2,3
     requestUrl = RequestEventsURL + "/" + str(getId) + rankingPath + ranking
+    jsonDict = sendRequest(requestUrl)
+
+    return jsonDict
+
+#def get_event_point_ranking(now_time):
+
+#########################
+# リクエスト送信関数
+# 引数：リクエスト送信先URL
+#########################
+def sendRequest(requestUrl):
+
     req = urllib.request.Request(requestUrl)
     json_dict = ""
     try :
@@ -301,10 +306,11 @@ def GetEventPointPersonRanking(getId, type, ranking):
     except urllib.error.ConnectionError as e:
         print('rase ConnectionError')
         print(e.reason)
+    except  :
+        print('Except')
 
     return json_dict
 
-#def get_event_point_ranking(now_time):
 
 #########################
 # 時刻変換関数
@@ -325,8 +331,6 @@ def TimeConversion(date_time):
 # 戻り値：boolean true 更新されている false 更新されていない
 #########################
 def ChkUpdateRanking(lastDataTime, nowTime, addMinitu = 0):
-    print(lastDataTime)
-    print(nowTime)
 
     updateFlg = False
     if lastDataTime == "" :
@@ -346,8 +350,6 @@ def ChkUpdateRanking(lastDataTime, nowTime, addMinitu = 0):
             updateFlg = True
         elif nextTime.date() == nowTime.date() and nextTime.strftime("%H:%M:%S") < nowTime.strftime("%H:%M:%S"):
             updateFlg = True
-
-    print(updateFlg)
 
     return updateFlg
 
