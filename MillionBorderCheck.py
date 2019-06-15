@@ -3,7 +3,6 @@ import asyncio
 import urllib.request
 import json
 import datetime
-import testClass
 import EventInfomation
 import time
 
