@@ -1,16 +1,14 @@
 import discord
 import asyncio
-import urllib.request
-import json
 import datetime
 import EventInfomation
-import time
 
 
 ###############################
 # パラメータ一覧
 ###############################
 
+# サーバ定数
 BOT_TOKEN            = "NTA3MjE1ODM4NTA4NjEzNjQz.Drtdbw.4m56UuTFpeU7MIpwJzfrvusttnE"
 TEXT_CHANNEL         = "545291639141171210"  # テキストチャットのチャンネルID
 EventInfoChanel      = "588734619692695558"  # イベント情報チャットのチャンネルID
@@ -18,9 +16,9 @@ PersonRankingChanel  = "588734676383039509"  # 個人ポイントチャットの
 LoungeRankingChanel  = "588742168970002439"  # ラウンジポイントチャットのチャンネルID
 BorderBotErrorChanel = "588776428808699954" # ボーダーボットのエラーログ出力チャンネルID
 
-
 # 実行感覚
 Interval = 60                                       # 60秒ごとにループする
+
 # メッセージ一覧
 StartUpMsg = "起動しました。"
 NoEventMsg = "現在開催中のイベントはありません"

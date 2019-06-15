@@ -1,10 +1,5 @@
-import discord
-import asyncio
-import urllib.request
-import json
 import datetime
 import Common
-import time
 
 
 class EventInfomation:
