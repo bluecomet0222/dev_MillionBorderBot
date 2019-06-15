@@ -3,6 +3,8 @@ import asyncio
 import urllib.request
 import json
 import datetime
+import testClass
+import EventInfomation
 import time
 
 
@@ -10,11 +12,11 @@ import time
 # パラメータ一覧
 ###############################
 
-BOT_TOKEN           = "NTA3MjE1ODM4NTA4NjEzNjQz.Drtdbw.4m56UuTFpeU7MIpwJzfrvusttnE"
-TEXT_CHANNEL        = "545291639141171210"  # テキストチャットのチャンネルID
-EventInfoChanel     = "588734619692695558"  # イベント情報チャットのチャンネルID
-PersonRankingChanel = "588734676383039509"  # 個人ポイントチャットのチャンネルID
-LoungeRankingChanel = "588742168970002439"  # ラウンジポイントチャットのチャンネルID
+BOT_TOKEN            = "NTA3MjE1ODM4NTA4NjEzNjQz.Drtdbw.4m56UuTFpeU7MIpwJzfrvusttnE"
+TEXT_CHANNEL         = "545291639141171210"  # テキストチャットのチャンネルID
+EventInfoChanel      = "588734619692695558"  # イベント情報チャットのチャンネルID
+PersonRankingChanel  = "588734676383039509"  # 個人ポイントチャットのチャンネルID
+LoungeRankingChanel  = "588742168970002439"  # ラウンジポイントチャットのチャンネルID
 BorderBotErrorChanel = "588776428808699954" # ボーダーボットのエラーログ出力チャンネルID
 
 
@@ -39,25 +41,43 @@ personRankChat = discord.Object(id=PersonRankingChanel)
 loungeRankChat = discord.Object(id=LoungeRankingChanel)
 borderBotErrorChat = discord.Object(id=BorderBotErrorChanel)
 
+
+# 検証
+eventInfo = EventInfomation.EventInfomation()
+
 ###############################
-# クライアントイベント
+# クライアントイベント開始
 ###############################
 @client.event
 async def on_ready():
     print('ログインしました')
-    asyncio.ensure_future(greeting_gm())
+    asyncio.ensure_future(greeting_gm(eventInfo))
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
     print('------')
 
+###############################
+#  設定情報表示
+###############################
 @client.event
-async def greeting_gm():
+async def on_message(message):
+    if message.author != client.user:
+        msg = message.author.mention + " Hi."
+        await client.send_message(eventChat, msg)
+
+
+###############################
+#  イベント関連出力
+###############################
+@client.event
+async def greeting_gm(eventInfo):
 
     await client.send_message(eventChat, StartUpMsg)
+    #eventInfo = EventInfomation.EventInfomation()
 
     # 起動後にはイベント情報を取得する
-    eventInfo = GetEventInfo()
+    eventInfo = eventInfo.GetEventInfo()
     msg = NoEventMsg
     eventType = -1
     eventId = -1
@@ -73,8 +93,6 @@ async def greeting_gm():
     while True:
 
         nowTime = datetime.datetime.now()
-        # ToDo : デバッグ用
-        #nowTime = datetime.datetime(2019, 6, 13, 0, 0, 0)
 
         # 0時0分 または 15時(初日)ならば、イベント情報を出力する
         # 0時0分 ならば実行
