@@ -11,7 +11,7 @@ import EventInfomation
 # サーバ定数
 BotToken            = "NTA3MjE1ODM4NTA4NjEzNjQz.Drtdbw.4m56UuTFpeU7MIpwJzfrvusttnE"
 Text_Channel         = "545291639141171210"  # テキストチャットのチャンネルID
-EventInfoChanel      = "588734619692695558"  # イベント情報チャットのチャンネルID
+EventInfoChanel      = "589642616929517568"  # イベント情報チャットのチャンネルID
 PersonRankingChanel  = "588734676383039509"  # 個人ポイントチャットのチャンネルID
 LoungeRankingChanel  = "588742168970002439"  # ラウンジポイントチャットのチャンネルID
 BorderBotErrorChanel = "588776428808699954" # ボーダーボットのエラーログ出力チャンネルID
