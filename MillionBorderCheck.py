@@ -10,11 +10,11 @@ import EventInfomation
 
 # サーバ定数
 BotToken            = "NTA3MjE1ODM4NTA4NjEzNjQz.Drtdbw.4m56UuTFpeU7MIpwJzfrvusttnE"
-Text_Channel         = "545291639141171210"  # テキストチャットのチャンネルID
-EventInfoChanel      = "589642616929517568"  # イベント情報チャットのチャンネルID
-PersonRankingChanel  = "588734676383039509"  # 個人ポイントチャットのチャンネルID
-LoungeRankingChanel  = "588742168970002439"  # ラウンジポイントチャットのチャンネルID
-BorderBotErrorChanel = "588776428808699954" # ボーダーボットのエラーログ出力チャンネルID
+#Text_Channel         = "589701487131885568"  # テキストチャットのチャンネルID
+EventInfoChanel      = "589701487131885568"  # イベント情報チャットのチャンネルID
+PersonRankingChanel  = "589701746066980864"  # 個人ポイントチャットのチャンネルID
+LoungeRankingChanel  = "589702040901517313"  # ラウンジポイントチャットのチャンネルID
+#BorderBotErrorChanel = "588776428808699954" # ボーダーボットのエラーログ出力チャンネルID
 
 # 実行感覚
 Interval = 60                                       # 60秒ごとにループする
@@ -26,11 +26,11 @@ NoEventMsg = "現在開催中のイベントはありません"
 client = discord.Client() # 接続に使用するオブジェクト
 
 # 各チャットのオブジェクト
-text_chat = discord.Object(id=Text_Channel)
+#text_chat = discord.Object(id=Text_Channel)
 eventChat = discord.Object(id=EventInfoChanel)
 personRankChat = discord.Object(id=PersonRankingChanel)
 loungeRankChat = discord.Object(id=LoungeRankingChanel)
-borderBotErrorChat = discord.Object(id=BorderBotErrorChanel)
+#borderBotErrorChat = discord.Object(id=BorderBotErrorChanel)
 
 
 ###############################
