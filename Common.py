@@ -29,6 +29,9 @@ class Common :
         except urllib.error.ConnectionError as e:
             print('rase ConnectionError')
             print(e.reason)
+        except OSError as e:
+            print('rase OSError')
+            print(e.reason)
         except:
             print('Except')
 

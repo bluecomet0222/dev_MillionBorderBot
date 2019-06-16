@@ -109,7 +109,8 @@ async def greeting_gm(_eventInfo):
                 msg = _eventInfo.GetEventInfoMsg(eventInfo, nowTime)
                 await client.send_message(eventChat, msg)
 
-        await client.send_message(eventChat, nowTime)
+        # ToDo:デバッグ用
+        #await client.send_message(eventChat, nowTime)
 
         # 1.Typeを確認し、シアターもしくはツアーでならば実行
         if eventType == 3 or eventType == 4:
