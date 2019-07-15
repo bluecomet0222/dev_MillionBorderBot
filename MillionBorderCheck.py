@@ -52,10 +52,11 @@ async def on_ready():
 ###############################
 @client.event
 async def on_message(message):
+    '''
     if message.author != client.user:
         msg = message.author.mention + " Hi."
         await client.send_message(eventChat, msg)
-
+    '''
 
 ###############################
 #  イベント関連出力
